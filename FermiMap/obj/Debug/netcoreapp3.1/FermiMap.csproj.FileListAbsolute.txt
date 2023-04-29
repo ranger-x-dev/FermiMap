@@ -1,0 +1,14 @@
+C:\Users\kylem\Documents\GitHub\FermiMap\FermiMap\bin\Debug\netcoreapp3.1\FermiMap.exe
+C:\Users\kylem\Documents\GitHub\FermiMap\FermiMap\bin\Debug\netcoreapp3.1\FermiMap.deps.json
+C:\Users\kylem\Documents\GitHub\FermiMap\FermiMap\bin\Debug\netcoreapp3.1\FermiMap.runtimeconfig.json
+C:\Users\kylem\Documents\GitHub\FermiMap\FermiMap\bin\Debug\netcoreapp3.1\FermiMap.runtimeconfig.dev.json
+C:\Users\kylem\Documents\GitHub\FermiMap\FermiMap\bin\Debug\netcoreapp3.1\FermiMap.dll
+C:\Users\kylem\Documents\GitHub\FermiMap\FermiMap\bin\Debug\netcoreapp3.1\FermiMap.pdb
+C:\Users\kylem\Documents\GitHub\FermiMap\FermiMap\obj\Debug\netcoreapp3.1\FermiMap.csproj.AssemblyReference.cache
+C:\Users\kylem\Documents\GitHub\FermiMap\FermiMap\obj\Debug\netcoreapp3.1\FermiMap.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\kylem\Documents\GitHub\FermiMap\FermiMap\obj\Debug\netcoreapp3.1\FermiMap.AssemblyInfoInputs.cache
+C:\Users\kylem\Documents\GitHub\FermiMap\FermiMap\obj\Debug\netcoreapp3.1\FermiMap.AssemblyInfo.cs
+C:\Users\kylem\Documents\GitHub\FermiMap\FermiMap\obj\Debug\netcoreapp3.1\FermiMap.csproj.CoreCompileInputs.cache
+C:\Users\kylem\Documents\GitHub\FermiMap\FermiMap\obj\Debug\netcoreapp3.1\FermiMap.dll
+C:\Users\kylem\Documents\GitHub\FermiMap\FermiMap\obj\Debug\netcoreapp3.1\FermiMap.pdb
+C:\Users\kylem\Documents\GitHub\FermiMap\FermiMap\obj\Debug\netcoreapp3.1\FermiMap.genruntimeconfig.cache
