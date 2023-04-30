@@ -1,7 +1,17 @@
-﻿using System;
+﻿/*
+    Program Name: FermiMap
+    Description: FermiMap is a tool to procedurally generate tilemaps in text and bitmap form. It can also generate raw Perlin noise maps.
+    Author: fermion87 (https://github.com/fermion87)
+    Created: April 30, 2023
+    Version: 1.0.0
+    Last Modified: April 30, 2023
+    License: MIT License
+*/
+
+using System;
+using System.IO;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
 
 namespace FermiMap
 {
@@ -153,19 +163,8 @@ namespace FermiMap
             //app loop
             while (choice != "x" && choice != "X")
             {
-                // Set the Foreground color to blue
+                // Set the Foreground color to white
                 Console.ForegroundColor = ConsoleColor.White;
-
-                //Test Perlin Noise
-                Perlin2 p = new Perlin2();
-
-                /*
-                for (int i = 0; i < 1000; i++)
-                {
-                    Console.WriteLine("Perlin noise: " + p.noise(3.14, i*0.01, 2));
-                }
-                Console.WriteLine("Perlin test complete.\n");
-                */
 
                 //Get seed
                 Console.WriteLine("Enter a map seed: ");
@@ -197,8 +196,6 @@ namespace FermiMap
                 }
                 // Output: Unable to parse ''
 
-
-
                 //Get height of room
                 Console.WriteLine("Enter the height of the room: ");
                 heightInput = Console.ReadLine();
@@ -229,8 +226,11 @@ namespace FermiMap
                 {
                     for (int j = 0; j < height; j++)
                     {
-                        tilemap[i, j] = Perlin2.perlin(0.02*i, 0.02*j, seed);
-                        
+                        //BASIC PERLIN
+                        //tilemap[i, j] = Perlin2.perlin(0.02*i, 0.02*j, seed);
+
+                        //OCTAVE PERLIN
+                        tilemap[i, j] = Perlin2.OctavePerlin(0.005*i, 0.005*j, seed, 3, 1)/3;
                     }
                 }
 
@@ -266,7 +266,7 @@ namespace FermiMap
                             {
                                 Console.ForegroundColor = ConsoleColor.Blue;
                             } 
-                            else if (tileValue < 0.6)
+                            else if (tileValue < 0.52)
                             {
                                 Console.ForegroundColor = ConsoleColor.Yellow;
                             }
@@ -290,7 +290,7 @@ namespace FermiMap
                     Console.WriteLine("\n");
                 }
                 //Export bitmap
-                Console.WriteLine("Exporting bitmap...\n");
+                Console.Write("Exporting bitmaps...");
                 Image<Rgba32> image = new Image<Rgba32>(width, height);
                 Image<Rgba32> imagePerlin = new Image<Rgba32>(width, height);
 
@@ -306,34 +306,26 @@ namespace FermiMap
 
                         if (tileValue < 0.5)
                         {
-                            Console.ForegroundColor = ConsoleColor.Blue;
-
                             Rgba32 pixel = new Rgba32(0, 0, 255);
                             image[j, i] = pixel;
-
-
                         }
-                        else if (tileValue < 0.6)
+                        else if (tileValue < 0.52)
                         {
-                            Console.ForegroundColor = ConsoleColor.Yellow;
                             Rgba32 pixel = new Rgba32(255, 255, 0);
                             image[j, i] = pixel;
                         }
                         else if (tileValue < 0.7)
                         {
-                            Console.ForegroundColor = ConsoleColor.Green;
                             Rgba32 pixel = new Rgba32(0, 255, 0);
                             image[j, i] = pixel;
                         }
                         else if (tileValue < 0.8)
                         {
-                            Console.ForegroundColor = ConsoleColor.DarkGray;
                             Rgba32 pixel = new Rgba32(20, 20, 20);
                             image[j, i] = pixel;
                         }
                         else if (tileValue < 0.9)
                         {
-                            Console.ForegroundColor = ConsoleColor.White;
                             Rgba32 pixel = new Rgba32(255, 255, 255);
                             image[j, i] = pixel;
                         }
@@ -344,8 +336,32 @@ namespace FermiMap
 
                 string outputPathPerlin = "tilemapPerlin.bmp";// specify the output path for the image
                 imagePerlin.Save(outputPathPerlin);
+                Console.Write("DONE.\n");
 
+                //OUTPUT TILEMAP TO TEXT FILE
+                Console.Write("Writing array to text file...");
+                string tilemapFilePath = "tilemap.map";
+                using (StreamWriter writer = new StreamWriter(tilemapFilePath))
+                {
+                    int rows = tilemap.GetLength(0);
+                    int columns = tilemap.GetLength(1);
 
+                    // Iterate over the array and write each element to the file
+                    for (int i = 0; i < rows; i++)
+                    {
+                        for (int j = 0; j < columns; j++)
+                        {
+                            writer.Write(tilemap[i, j]);
+                            if (j < columns - 1)
+                            {
+                                writer.Write(","); // Add a delimiter between columns
+                            }
+                        }
+                        writer.WriteLine(); // Move to the next line for the next row
+                    }
+                }
+
+                Console.Write("DONE.\n");
             }
         }
     }
