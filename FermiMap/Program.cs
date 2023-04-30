@@ -1,117 +1,146 @@
 ﻿using System;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 
 namespace FermiMap
 {
-    class Perlin
+    public class Perlin2
     {
-        /*
-        //Function to linearly interpolate between a0 and a1
-        // Weight w should be in the range [0.0, 1.0]
-        float interpolate(float a0, float a1, float w)
+
+        public static double OctavePerlin(double x, double y, double z, int octaves, double persistence)
         {
-            // // You may want clamping by inserting:
-            // if (0.0 > w) return a0;
-            // if (1.0 < w) return a1;
-            //
-            return (a1 - a0) * w + a0;
-            // // Use this cubic interpolation [[Smoothstep]] instead, for a smooth appearance:
-            // return (a1 - a0) * (3.0 - w * 2.0) * w * w + a0;
-            //
-            // // Use [[Smootherstep]] for an even smoother result with a second derivative equal to zero on boundaries:
-            // return (a1 - a0) * ((w * (w * 6.0 - 15.0) + 10.0) * w * w * w) + a0;
-            //
+            double total = 0;
+            double frequency = 1;
+            double amplitude = 1;
+            for (int i = 0; i < octaves; i++)
+            {
+                total += perlin(x * frequency, y * frequency, z * frequency) * amplitude;
+
+                amplitude *= persistence;
+                frequency *= 2;
+            }
+
+            return total;
         }
 
-        struct vector2 {
-            float x, y;
+        private static readonly int[] permutation = { 151,160,137,91,90,15,					// Hash lookup table as defined by Ken Perlin.  This is a randomly
+		131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,	// arranged array of all numbers from 0-255 inclusive.
+		190, 6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,
+        88,237,149,56,87,174,20,125,136,171,168, 68,175,74,165,71,134,139,48,27,166,
+        77,146,158,231,83,111,229,122,60,211,133,230,220,105,92,41,55,46,245,40,244,
+        102,143,54, 65,25,63,161, 1,216,80,73,209,76,132,187,208, 89,18,169,200,196,
+        135,130,116,188,159,86,164,100,109,198,173,186, 3,64,52,217,226,250,124,123,
+        5,202,38,147,118,126,255,82,85,212,207,206,59,227,47,16,58,17,182,189,28,42,
+        223,183,170,213,119,248,152, 2,44,154,163, 70,221,153,101,155,167, 43,172,9,
+        129,22,39,253, 19,98,108,110,79,113,224,232,178,185, 112,104,218,246,97,228,
+        251,34,242,193,238,210,144,12,191,179,162,241, 81,51,145,235,249,14,239,107,
+        49,192,214, 31,181,199,106,157,184, 84,204,176,115,121,50,45,127, 4,150,254,
+        138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180
+    };
+
+        private static readonly int[] p;                                                    // Doubled permutation to avoid overflow
+
+        static Perlin2()
+        {
+            p = new int[512];
+            for (int x = 0; x < 512; x++)
+            {
+                p[x] = permutation[x % 256];
+            }
         }
 
-        vector2 randomGradient(int ix, int iy)
+        public static double perlin(double x, double y, double z)
         {
-            // No precomputed gradients mean this works for any number of grid coordinates
-            const int w = 8 * sizeof(int);
-            const int s = w / 2; // rotation width
-            int a = ix, b = iy;
-            a *= 3284157443; b ^= a << s | a >> w - s;
-            b *= 1911520717; a ^= b << s | b >> w - s;
-            a *= 2048419325;
-            double random = a * (3.14159265 / ~(~0u >> 1)); // in [0, 2*Pi]
-            vector2 v;
-            v.x = Math.Cos(random); v.y = Math.Sin(random);
-            return v;
-        }
-        */
+            int repeat = 0;
+            if (repeat > 0)
+            {                                   // If we have any repeat on, change the coordinates to their "local" repetitions
+                x = x % repeat;
+                y = y % repeat;
+                z = z % repeat;
+            }
 
-        //Perlin Noise implementation
-        int[] p = { 151, 160, 137, 91, 90, 15, 131, 13, 201, 95, 96, 53, 194, 233, 7, 225, 140, 36,
-                      103, 30, 69, 142, 8, 99, 37, 240, 21, 10, 23, 190, 6, 148, 247, 120, 234, 75, 0,
-                      26, 197, 62, 94, 252, 219, 203, 117, 35, 11, 32, 57, 177, 33, 88, 237, 149, 56,
-                      87, 174, 20, 125, 136, 171, 168, 68, 175, 74, 165, 71, 134, 139, 48, 27, 166,
-                      77, 146, 158, 231, 83, 111, 229, 122, 60, 211, 133, 230, 220, 105, 92, 41, 55,
-                      46, 245, 40, 244, 102, 143, 54, 65, 25, 63, 161, 1, 216, 80, 73, 209, 76, 132,
-                      187, 208, 89, 18, 169, 200, 196, 135, 130, 116, 188, 159, 86, 164, 100, 109,
-                      198, 173, 186, 3, 64, 52, 217, 226, 250, 124, 123, 5, 202, 38, 147, 118, 126,
-                      255, 82, 85, 212, 207, 206, 59, 227, 47, 16, 58, 17, 182, 189, 28, 42, 223, 183,
-                      170, 213, 119, 248, 152, 2, 44, 154, 163, 70, 221, 153, 101, 155, 167, 43,
-                      172, 9, 129, 22, 39, 253, 19, 98, 108, 110, 79, 113, 224, 232, 178, 185, 112,
-                      104, 218, 246, 97, 228, 251, 34, 242, 193, 238, 210, 144, 12, 191, 179, 162,
-                      241, 81, 51, 145, 235, 249, 14, 239, 107, 49, 192, 214, 31, 181, 199, 106,
-                      157, 184, 84, 204, 176, 115, 121, 50, 45, 127, 4, 150, 254, 138, 236, 205,
-                      93, 222, 114, 67, 29, 24, 72, 243, 141, 128, 195, 78, 66, 215, 61, 156, 180 };
+            int xi = (int)x & 255;                              // Calculate the "unit cube" that the point asked will be located in
+            int yi = (int)y & 255;                              // The left bound is ( |_x_|,|_y_|,|_z_| ) and the right bound is that
+            int zi = (int)z & 255;                              // plus 1.  Next we calculate the location (from 0.0 to 1.0) in that cube.
+            double xf = x - (int)x;                             // We also fade the location to smooth the result.
+            double yf = y - (int)y;
+            double zf = z - (int)z;
+            double u = fade(xf);
+            double v = fade(yf);
+            double w = fade(zf);
 
-        double fade(double t)
-        {
-            return t * t * t * (t * (t * 6 - 15) + 10);
-        }
+            int a = p[xi] + yi;                             // This here is Perlin's hash function.  We take our x value (remember,
+            int aa = p[a] + zi;                             // between 0 and 255) and get a random value (from our p[] array above) between
+            int ab = p[a + 1] + zi;                             // 0 and 255.  We then add y to it and plug that into p[], and add z to that.
+            int b = p[xi + 1] + yi;                             // Then, we get another random value by adding 1 to that and putting it into p[]
+            int ba = p[b] + zi;                             // and add z to it.  We do the whole thing over again starting with x+1.  Later
+            int bb = p[b + 1] + zi;                             // we plug aa, ab, ba, and bb back into p[] along with their +1's to get another set.
+                                                                // in the end we have 8 values between 0 and 255 - one for each vertex on the unit cube.
+                                                                // These are all interpolated together using u, v, and w below.
 
-        double lerp(double t, double a, double b)
-        {
-            return a + t * (b - a);
-        }
+            double x1, x2, y1, y2;
+            x1 = lerp(grad(p[aa], xf, yf, zf),          // This is where the "magic" happens.  We calculate a new set of p[] values and use that to get
+                        grad(p[ba], xf - 1, yf, zf),            // our final gradient values.  Then, we interpolate between those gradients with the u value to get
+                        u);                                     // 4 x-values.  Next, we interpolate between the 4 x-values with v to get 2 y-values.  Finally,
+            x2 = lerp(grad(p[ab], xf, yf - 1, zf),          // we interpolate between the y-values to get a z-value.
+                        grad(p[bb], xf - 1, yf - 1, zf),
+                        u);                                     // When calculating the p[] values, remember that above, p[a+1] expands to p[xi]+yi+1 -- so you are
+            y1 = lerp(x1, x2, v);                               // essentially adding 1 to yi.  Likewise, p[ab+1] expands to p[p[xi]+yi+1]+zi+1] -- so you are adding
+                                                                // to zi.  The other 3 parameters are your possible return values (see grad()), which are actually
+            x1 = lerp(grad(p[aa + 1], xf, yf, zf - 1),      // the vectors from the edges of the unit cube to the point in the unit cube itself.
+                        grad(p[ba + 1], xf - 1, yf, zf - 1),
+                        u);
+            x2 = lerp(grad(p[ab + 1], xf, yf - 1, zf - 1),
+                          grad(p[bb + 1], xf - 1, yf - 1, zf - 1),
+                          u);
+            y2 = lerp(x1, x2, v);
 
-        double grad(int hash, double x, double y, double z)
-        {
-            int h = hash & 15;
-            double u = h < 8 ? x : y,
-                   v = h < 4 ? y : h == 12 || h == 14 ? x : z;
-            return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
+            return (lerp(y1, y2, w) + 1) / 2;                       // For convenience we bound it to 0 - 1 (theoretical min/max before is -1 - 1)
         }
 
-        /// x0, y0 and z0 can be any real numbers, but the result is
-        /// zero if they are all integers.
-        /// The result is probably in [-1.0, 1.0].
-        public double noise(double x, double y, double z)
+        public static double grad(int hash, double x, double y, double z)
         {
-            int X = (int)Math.Floor(x) & 255,
-                Y = (int)Math.Floor(y) & 255,
-                Z = (int)Math.Floor(z) & 255;
-            x -= Math.Floor(x);
-            y -= Math.Floor(y);
-            z -= Math.Floor(z);
-            double u = fade(x),
-                   v = fade(y),
-                   w = fade(z);
-            int A = p[X] + Y, AA = p[A] + Z, AB = p[A + 1] + Z,
-                B = p[X + 1] + Y, BA = p[B] + Z, BB = p[B + 1] + Z;
+            int h = hash & 15;                                  // Take the hashed value and take the first 4 bits of it (15 == 0b1111)
+            double u = h < 8 /* 0b1000 */ ? x : y;              // If the most signifigant bit (MSB) of the hash is 0 then set u = x.  Otherwise y.
 
-            return lerp(w, lerp(v, lerp(u, grad(p[AA], x, y, z),
-                                           grad(p[BA], x - 1, y, z)),
-                                   lerp(u, grad(p[AB], x, y - 1, z),
-                                           grad(p[BB], x - 1, y - 1, z))),
-                           lerp(v, lerp(u, grad(p[AA + 1], x, y, z - 1),
-                                           grad(p[BA + 1], x - 1, y, z - 1)),
-                                   lerp(u, grad(p[AB + 1], x, y - 1, z - 1),
-                                           grad(p[BB + 1], x - 1, y - 1, z - 1))));
+            double v;                                           // In Ken Perlin's original implementation this was another conditional operator (?:).  I
+                                                                // expanded it for readability.
+
+            if (h < 4 /* 0b0100 */)                             // If the first and second signifigant bits are 0 set v = y
+                v = y;
+            else if (h == 12 /* 0b1100 */ || h == 14 /* 0b1110*/)// If the first and second signifigant bits are 1 set v = x
+                v = x;
+            else                                                // If the first and second signifigant bits are not equal (0/1, 1/0) set v = z
+                v = z;
+
+            return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v); // Use the last 2 bits to decide if u and v are positive or negative.  Then return their addition.
+        }
+
+        public static double fade(double t)
+        {
+            // Fade function as defined by Ken Perlin.  This eases coordinate values
+            // so that they will "ease" towards integral values.  This ends up smoothing
+            // the final output.
+            return t * t * t * (t * (t * 6 - 15) + 10);         // 6t^5 - 15t^4 + 10t^3
+        }
+
+        public static double lerp(double a, double b, double x)
+        {
+            return a + x * (b - a);
         }
     }
     class Program
     {
         static void Main(string[] args)
         {
+
             //init vars
+            string seedInput;
             string widthInput;
             string heightInput;
 
+            int seed = 6171987;
             int width = 0;
             int height = 0;
 
@@ -128,7 +157,7 @@ namespace FermiMap
                 Console.ForegroundColor = ConsoleColor.White;
 
                 //Test Perlin Noise
-                Perlin p = new Perlin();
+                Perlin2 p = new Perlin2();
 
                 /*
                 for (int i = 0; i < 1000; i++)
@@ -138,6 +167,21 @@ namespace FermiMap
                 Console.WriteLine("Perlin test complete.\n");
                 */
 
+                //Get seed
+                Console.WriteLine("Enter a map seed: ");
+                seedInput = Console.ReadLine();
+
+                try
+                {
+                    seed = Int32.Parse(seedInput);
+                    Console.WriteLine("seed: " + seed +"\n");
+                }
+                catch (FormatException)
+                {
+                    Console.WriteLine($"Unable to parse '{seedInput}'");
+                }
+                // Output: Unable to parse ''
+
                 //Get width of room
                 Console.WriteLine("Enter the width of the room: ");
                 widthInput = Console.ReadLine();
@@ -145,7 +189,7 @@ namespace FermiMap
                 try
                 {
                     width = Int32.Parse(widthInput);
-                    Console.WriteLine("width: " + width);
+                    Console.WriteLine("width: " + width + "\n");
                 }
                 catch (FormatException)
                 {
@@ -162,7 +206,7 @@ namespace FermiMap
                 try
                 {
                     height = Int32.Parse(heightInput);
-                    Console.WriteLine("width: " + height);
+                    Console.WriteLine("width: " + height + "\n");
                 }
                 catch (FormatException)
                 {
@@ -178,84 +222,22 @@ namespace FermiMap
 
                 double[,] tilemap = new double[width, height];
 
-                /*
-                //randomly assign terrain
-                for (int i = 0; i < width; i++)
-                {
-                    //randomly assign terrain
-                    for (int j = 0; j < height; j++)
-                    {
-                        //Console.WriteLine(i + ", " + j);
-                        //tilemap[i, j] = i * j;
-                        tilemap[i, j] = rnd.Next(0,5);
-                    }
-                }
-                */
 
-                //randomly assign terrain
-                for (int i = 0; i < width; i++)
-                {
-                    //randomly assign terrain
-                    for (int j = 0; j < height; j++)
-                    {
-                        //Console.WriteLine(i + ", " + j);
-                        //tilemap[i, j] = i * j;
-                        tilemap[i, j] = p.noise(3.14*i/width, 1.45*j/height, 0.1);
-                    }
-                }
-
-                ///OCEAN BORDER
-                /*
-                //add ocean to borders TOP
-                int oceanBorder = rnd.Next(12, 18);
+                //***GENERATE PERLIN NOISE TERRAIN***
 
                 for (int i = 0; i < width; i++)
                 {
-                    for (int j = 0; j < oceanBorder; j++)
-                    {
-                        oceanBorder = rnd.Next(12, 18);
-                        tilemap[i, j] = 0;
-                    }
-                }
-
-                //add ocean to borders BOTTOM
-   
-                for (int i = 0; i < width; i++)
-                {
-                    for (int j = height-oceanBorder; j < height; j++)
-                    {
-                        oceanBorder = rnd.Next(12, 18);
-                        tilemap[i, j] = 0;
-                    }
-                }
-
-                //add ocean to borders left
-                oceanBorder = rnd.Next(12, 18);
-                for (int i = 0; i < oceanBorder; i++)
-                {
                     for (int j = 0; j < height; j++)
                     {
-                        oceanBorder = rnd.Next(12, 18);
-                        tilemap[i, j] = 0;
+                        tilemap[i, j] = Perlin2.perlin(0.02*i, 0.02*j, seed);
+                        
                     }
                 }
-
-                //add ocean to borders left
-                oceanBorder = rnd.Next(12, 18);
-                for (int i = width-oceanBorder; i < width; i++)
-                {
-                    for (int j = 0; j < height; j++)
-                    {
-                        oceanBorder = rnd.Next(12, 18);
-                        tilemap[i, j] = 0;
-                    }
-                }
-                */
 
                 Console.WriteLine("Tilemap generated.\n");
+
                 Console.WriteLine("Would you like to see the tilemap? (Y/N? or X to exit)\n");
                 choice = Console.ReadLine();
-
                 if(choice == "y" || choice == "Y")
                 {
                     
@@ -269,9 +251,7 @@ namespace FermiMap
                         }
                     }
                     Console.WriteLine("");
-                   
 
-                    
                     //show an ASCII tilemap
                     Console.WriteLine("Here's an ASCII render...\n");
 
@@ -281,36 +261,16 @@ namespace FermiMap
                         Console.WriteLine("");
                         for (int j = 0; j < width; j++)
                         {
-                            /*
-                            switch(tilemap[j,i])
-                            {
-                                case 0: 
-                                    Console.ForegroundColor = ConsoleColor.Blue;
-                                    break;
-                                case 1:
-                                    Console.ForegroundColor = ConsoleColor.Yellow;
-                                    break;
-                                case 2:
-                                    Console.ForegroundColor = ConsoleColor.Green;
-                                    break;
-                                case 3:
-                                    Console.ForegroundColor = ConsoleColor.DarkGray;
-                                    break;
-                                case 4:
-                                    Console.ForegroundColor = ConsoleColor.White;
-                                    break;
-                            }
-                            */
-                            double tileValue = 3*tilemap[j, i]+0.5;
-                            if (tileValue < 0.2)
+                            double tileValue = tilemap[j, i];
+                            if (tileValue < 0.5)
                             {
                                 Console.ForegroundColor = ConsoleColor.Blue;
                             } 
-                            else if (tileValue < 0.4)
+                            else if (tileValue < 0.6)
                             {
                                 Console.ForegroundColor = ConsoleColor.Yellow;
                             }
-                            else if (tileValue < 0.6)
+                            else if (tileValue < 0.7)
                             {
                                 Console.ForegroundColor = ConsoleColor.Green;
                             }
@@ -318,7 +278,7 @@ namespace FermiMap
                             {
                                 Console.ForegroundColor = ConsoleColor.DarkGray;
                             }
-                            else if (tileValue < 1.0)
+                            else if (tileValue < 0.9)
                             {
                                 Console.ForegroundColor = ConsoleColor.White;
                             }
@@ -327,8 +287,65 @@ namespace FermiMap
                         }
                     }
                     Console.WriteLine("\n");
-                    
+                    Console.WriteLine("\n");
                 }
+                //Export bitmap
+                Console.WriteLine("Exporting bitmap...\n");
+                Image<Rgba32> image = new Image<Rgba32>(width, height);
+                Image<Rgba32> imagePerlin = new Image<Rgba32>(width, height);
+
+                for (int i = 0; i < height; i++)
+                {
+                    for (int j = 0; j < width; j++)
+                    {
+                        double tileValue = tilemap[j, i];
+
+                        //render noise bmp
+                        Rgba32 pixelPerlin = new Rgba32((byte)(tileValue*255), (byte)(tileValue * 255), (byte)(tileValue * 255));
+                        imagePerlin[j, i] = pixelPerlin;
+
+                        if (tileValue < 0.5)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Blue;
+
+                            Rgba32 pixel = new Rgba32(0, 0, 255);
+                            image[j, i] = pixel;
+
+
+                        }
+                        else if (tileValue < 0.6)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Yellow;
+                            Rgba32 pixel = new Rgba32(255, 255, 0);
+                            image[j, i] = pixel;
+                        }
+                        else if (tileValue < 0.7)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            Rgba32 pixel = new Rgba32(0, 255, 0);
+                            image[j, i] = pixel;
+                        }
+                        else if (tileValue < 0.8)
+                        {
+                            Console.ForegroundColor = ConsoleColor.DarkGray;
+                            Rgba32 pixel = new Rgba32(20, 20, 20);
+                            image[j, i] = pixel;
+                        }
+                        else if (tileValue < 0.9)
+                        {
+                            Console.ForegroundColor = ConsoleColor.White;
+                            Rgba32 pixel = new Rgba32(255, 255, 255);
+                            image[j, i] = pixel;
+                        }
+                    }
+                }
+                string outputPath = "tilemap.bmp";// specify the output path for the image
+                image.Save(outputPath);
+
+                string outputPathPerlin = "tilemapPerlin.bmp";// specify the output path for the image
+                imagePerlin.Save(outputPathPerlin);
+
+
             }
         }
     }

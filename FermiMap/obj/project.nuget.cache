@@ -1,8 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "HeAxvsHhOXupEj7MK/pHqejLWAJkpVJOuJl4KL6IlNX5Sp45PiF+64e46eW2a060dHx6lrA3aEdSM+ckmHYP6A==",
+  "dgSpecHash": "bFMYSrzooKTbLbIn08zZl4YOSsiDHe94tt0cSRNB/j+V4jrcIJEDeA7otIujVUZluDexQ5KZneCUnw4zj1XD8w==",
   "success": true,
   "projectFilePath": "C:\\Users\\kylem\\Documents\\GitHub\\FermiMap\\FermiMap\\FermiMap.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\kylem\\.nuget\\packages\\microsoft.netcore.platforms\\5.0.0\\microsoft.netcore.platforms.5.0.0.nupkg.sha512",
+    "C:\\Users\\kylem\\.nuget\\packages\\sixlabors.imagesharp\\2.1.4\\sixlabors.imagesharp.2.1.4.nupkg.sha512",
+    "C:\\Users\\kylem\\.nuget\\packages\\system.runtime.compilerservices.unsafe\\5.0.0\\system.runtime.compilerservices.unsafe.5.0.0.nupkg.sha512",
+    "C:\\Users\\kylem\\.nuget\\packages\\system.text.encoding.codepages\\5.0.0\\system.text.encoding.codepages.5.0.0.nupkg.sha512"
+  ],
   "logs": []
 }
