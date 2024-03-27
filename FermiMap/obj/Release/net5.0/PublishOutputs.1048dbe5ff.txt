@@ -1,0 +1,6 @@
+C:\Users\kylem\Desktop\FermiMap.exe
+C:\Users\kylem\Desktop\FermiMap.dll
+C:\Users\kylem\Desktop\FermiMap.deps.json
+C:\Users\kylem\Desktop\FermiMap.runtimeconfig.json
+C:\Users\kylem\Desktop\FermiMap.pdb
+C:\Users\kylem\Desktop\SixLabors.ImageSharp.dll

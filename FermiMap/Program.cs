@@ -230,7 +230,7 @@ namespace FermiMap
                         //tilemap[i, j] = Perlin2.perlin(0.02*i, 0.02*j, seed);
 
                         //OCTAVE PERLIN
-                        tilemap[i, j] = Perlin2.OctavePerlin(0.005*i, 0.005*j, seed, 3, 1)/3;
+                        tilemap[i, j] = Perlin2.OctavePerlin(0.004*i, 0.004*j, seed, 3, 1)/3;
                     }
                 }
 
@@ -308,26 +308,31 @@ namespace FermiMap
                         {
                             Rgba32 pixel = new Rgba32(0, 0, 255);
                             image[j, i] = pixel;
+                            tilemap[j, i] = 0;
                         }
                         else if (tileValue < 0.52)
                         {
                             Rgba32 pixel = new Rgba32(255, 255, 0);
                             image[j, i] = pixel;
+                            tilemap[j, i] = 1;
                         }
                         else if (tileValue < 0.7)
                         {
                             Rgba32 pixel = new Rgba32(0, 255, 0);
                             image[j, i] = pixel;
+                            tilemap[j, i] = 2;
                         }
                         else if (tileValue < 0.8)
                         {
                             Rgba32 pixel = new Rgba32(20, 20, 20);
                             image[j, i] = pixel;
+                            tilemap[j, i] = 3;
                         }
                         else if (tileValue < 0.9)
                         {
                             Rgba32 pixel = new Rgba32(255, 255, 255);
                             image[j, i] = pixel;
+                            tilemap[j, i] = 4;
                         }
                     }
                 }
